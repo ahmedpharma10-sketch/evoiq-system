@@ -519,14 +519,14 @@ export function ResidencyTaskManager() {
             continue;
           }
 
-          const templateData = {
+          const templateData: Omit<ResidencyTaskTemplate, "id" | "createdAt"> = {
             name: taskName,
             description: description || undefined,
-            recurrence,
-            startDateMode,
+            recurrence: recurrence as "one_time" | "weekly" | "monthly" | "quarterly" | "annually",
+            startDateMode: startDateMode as "manual" | "offset_days",
             startDate: startDateMode === "manual" ? startDate : undefined,
             offsetDays: startDateMode === "offset_days" ? offsetDays : undefined,
-            priority,
+            priority: priority as "low" | "medium" | "high" | "urgent",
             applicantType: "main_only", // Default for CSV import
             order: templates.length + successCount,
           };

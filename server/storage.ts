@@ -413,7 +413,7 @@ export class DatabaseStorage implements IStorage {
 
   async upsertTask(task: InsertTask): Promise<{ task: Task; wasCreated: boolean }> {
     // Ensure dueAt is a proper Date object (may arrive as ISO string from task generators)
-    const dueAtDate = task.dueAt instanceof Date ? task.dueAt : new Date(task.dueAt as any);
+    const dueAtDate = typeof task.dueAt === 'string' ? new Date(task.dueAt) : (task.dueAt as Date);
 
     // Check if task with this uniqueKey already exists
     const existing = await this.getTaskByUniqueKey(task.uniqueKey);
@@ -579,10 +579,12 @@ export class DatabaseStorage implements IStorage {
     // Create audit log entry
     await this.createAuditLog({
       taskId: id,
-      action: "reopened",
+      taskTitle: task.title,
+      companyId: task.companyId,
+      companyName: task.companyName,
+      fromStatus: oldStatus,
+      toStatus: "open",
       performedBy: reopenedByName,
-      oldValue: oldStatus,
-      newValue: "open",
       reason: reason || `Task reopened by ${reopenedByName}`,
       timestamp: new Date().toISOString(),
     });
@@ -591,10 +593,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAuditLog(audit: InsertTaskAudit): Promise<TaskAudit> {
-    // Ensure timestamp is a proper Date object
+    // Ensure timestamp is a proper ISO string
     const values = {
       ...audit,
-      timestamp: (audit.timestamp as any) instanceof Date ? audit.timestamp : new Date((audit.timestamp as any) || Date.now()),
+      timestamp: typeof audit.timestamp === 'string' ? audit.timestamp : new Date(audit.timestamp as any).toISOString(),
     };
     const [newAudit] = await db
       .insert(taskAuditsTable)

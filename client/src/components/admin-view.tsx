@@ -1963,7 +1963,7 @@ export function AdminView() {
                       <TableRow key={log.id} data-testid={`activity-log-${index}`}>
                         <TableCell data-testid={`cell-log-ref-${index}`} className="whitespace-nowrap font-mono text-xs">
                           <Badge variant="outline" className="text-xs font-mono">
-                            LOG-{String(log.logRefId || index + 1).padStart(3, '0')}
+                            LOG-{String(index + 1).padStart(3, '0')}
                           </Badge>
                         </TableCell>
                         <TableCell data-testid={`cell-log-date-${index}`} className="whitespace-nowrap">
