@@ -1754,6 +1754,8 @@ export type DeletionRequest = typeof deletionRequests.$inferSelect;
 export const insertGeneralLogSchema = createInsertSchema(generalLog).omit({
   id: true,
   timestamp: true,
+}).extend({
+  metadata: z.record(z.any()).optional(),
 });
 
 export type InsertGeneralLog = z.infer<typeof insertGeneralLogSchema>;
