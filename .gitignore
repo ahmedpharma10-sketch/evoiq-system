@@ -9,3 +9,4 @@ api/index.js
 pglite-data/
 
 .env*.local
+.vercel
