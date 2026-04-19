@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "vite:dev": "vite --port 5173 --host",
-    "build": "vite build && node build-api.mjs",
+    "build": "vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",

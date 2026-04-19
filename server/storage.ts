@@ -1351,5 +1351,19 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Export DatabaseStorage as the primary storage interface
-export const storage = new DatabaseStorage();
+// Export DatabaseStorage as a lazy singleton (for serverless compatibility)
+let storageInstance: DatabaseStorage | null = null;
+
+export function getStorage(): DatabaseStorage {
+  if (!storageInstance) {
+    storageInstance = new DatabaseStorage();
+  }
+  return storageInstance;
+}
+
+// For backward compatibility, export as a getter property
+export const storage = new Proxy({} as any, {
+  get: (target, prop, receiver) => {
+    return getStorage()[prop as keyof DatabaseStorage];
+  }
+});

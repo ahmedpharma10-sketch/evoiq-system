@@ -27,6 +27,31 @@ async function getApp(): Promise<express.Application> {
   }
 
   initPromise = (async () => {
+    try {
+      // Pre-load all required modules before anything else
+      console.log('[handler] Pre-loading modules...');
+
+      if (process.env.DATABASE_URL) {
+        console.log('[handler] Loading Neon modules...');
+        await Promise.all([
+          import('@neondatabase/serverless'),
+          import('drizzle-orm/neon-serverless'),
+          import('ws')
+        ]);
+      } else {
+        console.log('[handler] Loading PGlite modules...');
+        await Promise.all([
+          import('@electric-sql/pglite'),
+          import('drizzle-orm/pglite')
+        ]);
+      }
+
+      console.log('[handler] All modules pre-loaded successfully');
+    } catch (moduleError) {
+      console.error('[handler] Failed to pre-load modules:', moduleError);
+      throw moduleError;
+    }
+
     const newApp = express();
 
     // Configure session store
@@ -95,7 +120,11 @@ async function getApp(): Promise<express.Application> {
     });
 
     try {
-      // Initialize database
+      // Initialize database connection
+      const { initializeDb } = await import('../server/db');
+      await initializeDb();
+
+      // Initialize database schema and seed data
       await initializeDatabase();
 
       // Register API routes
