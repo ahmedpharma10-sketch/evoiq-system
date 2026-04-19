@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const entryFile = path.join(__dirname, 'api', 'index.ts');
+const entryFile = path.join(__dirname, 'api', 'handler.ts');
 const outFile = path.join(__dirname, 'api', 'index.js');
 
 console.log(`Building API from: ${entryFile}`);
