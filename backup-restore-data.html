@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CorpManageSys - Data Backup & Restore Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .section h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section p {
+            color: #4a5568;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: #48bb78;
+        }
+        
+        button.secondary:hover {
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            background: #4299e1;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .file-input-label:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+            display: block;
+        }
+        
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+            display: block;
+        }
+        
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 2px solid #90cdf4;
+            display: block;
+        }
+        
+        .icon {
+            font-size: 24px;
+        }
+        
+        .warning {
+            background: #fef5e7;
+            border: 2px solid #f39c12;
+            color: #7d6608;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 CorpManageSys Data Manager</h1>
+        <p class="subtitle">Backup and restore your localStorage data</p>
+        
+        <div class="warning">
+            <strong>⚠️ Important Information:</strong>
+            <p>This tool manages ALL your CorpManageSys data stored in browser localStorage. This includes companies, employees, tasks, users, templates, and activity logs. <strong>Always backup your data before restoring!</strong></p>
+        </div>
+        
+        <div class="warning" style="background: #fef5e7; border-color: #e74c3c; color: #c0392b;">
+            <strong>🌐 Same-Origin Requirement:</strong>
+            <p><strong>IMPORTANT:</strong> This tool MUST be accessed from your deployed domain (e.g., <code>https://yourdomain.com/backup-restore-data.html</code>) to work properly!</p>
+            <p>❌ <strong>Will NOT work:</strong> Opening this file locally (file:///...) or from a different domain</p>
+            <p>✅ <strong>Will work:</strong> Uploading this file to your <code>public_html</code> folder and accessing via your domain</p>
+            <p><strong>To use this tool:</strong></p>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Upload <code>backup-restore-data.html</code> to your server's <code>public_html</code> folder</li>
+                <li>Access it via your domain: <code>https://yourdomain.com/backup-restore-data.html</code></li>
+                <li>You can now backup/restore localStorage data from your deployed application</li>
+            </ol>
+        </div>
+        
+        <!-- Backup Section -->
+        <div class="section">
+            <h2><span class="icon">💾</span> Backup Data</h2>
+            <p>Download all CorpManageSys data from browser localStorage as a JSON file. This creates a complete backup that can be restored later.</p>
+            <button id="backupBtn">Download Backup File</button>
+            <div id="backupStatus" class="status"></div>
+        </div>
+        
+        <!-- Restore Section -->
+        <div class="section">
+            <h2><span class="icon">📤</span> Restore Data</h2>
+            <p>Upload a previously saved backup file to restore your data. <strong>Warning:</strong> This will replace ALL current data in your browser!</p>
+            <input type="file" id="restoreFileInput" accept=".json" />
+            <label for="restoreFileInput" class="file-input-label">Choose Backup File to Restore</label>
+            <button id="restoreBtn" class="secondary" style="display:none;">Confirm Restore</button>
+            <div id="restoreStatus" class="status"></div>
+        </div>
+        
+        <!-- View Data Section -->
+        <div class="section">
+            <h2><span class="icon">📊</span> View Current Data</h2>
+            <p>See a summary of your current localStorage data without downloading.</p>
+            <button id="viewBtn">View Data Summary</button>
+            <div id="viewStatus" class="status"></div>
+        </div>
+        
+        <!-- Clear Data Section -->
+        <div class="section">
+            <h2><span class="icon">🗑️</span> Clear All Data</h2>
+            <p><strong style="color: #e53e3e;">Danger Zone:</strong> This will permanently delete ALL CorpManageSys data from this browser. This action cannot be undone!</p>
+            <button id="clearBtn" style="background: #e53e3e;">Clear All Data (Cannot be undone!)</button>
+            <div id="clearStatus" class="status"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Get all localStorage data for CorpManageSys
+        function getCorpManageData() {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('corporate-management-')) {
+                    try {
+                        data[key] = localStorage.getItem(key);
+                    } catch (e) {
+                        console.error(`Error reading ${key}:`, e);
+                    }
+                }
+            }
+            return data;
+        }
+        
+        // Count items in data
+        function getDataStats(data) {
+            const stats = {};
+            Object.keys(data).forEach(key => {
+                try {
+                    const parsed = JSON.parse(data[key]);
+                    const cleanKey = key.replace('corporate-management-', '');
+                    if (Array.isArray(parsed)) {
+                        stats[cleanKey] = parsed.length;
+                    } else {
+                        stats[cleanKey] = 1;
+                    }
+                } catch (e) {
+                    stats[key] = 'Invalid JSON';
+                }
+            });
+            return stats;
+        }
+        
+        // Backup Button
+        document.getElementById('backupBtn').addEventListener('click', function() {
+            try {
+                const data = getCorpManageData();
+                
+                if (Object.keys(data).length === 0) {
+                    showStatus('backupStatus', 'error', 'No CorpManageSys data found in localStorage!');
+                    return;
+                }
+                
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+                const timeStr = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
+                const filename = `corpmanagesys-backup-${timestamp}-${timeStr}.json`;
+                
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.click();
+                URL.revokeObjectURL(url);
+                
+                const stats = getDataStats(data);
+                showStatus('backupStatus', 'success', 
+                    `✅ Backup downloaded successfully as "${filename}"! ` +
+                    `Backed up: ${Object.keys(stats).length} data categories.`
+                );
+            } catch (error) {
+                showStatus('backupStatus', 'error', `❌ Error creating backup: ${error.message}`);
+            }
+        });
+        
+        // File input change
+        let selectedFile = null;
+        document.getElementById('restoreFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('restoreBtn').style.display = 'block';
+                showStatus('restoreStatus', 'info', 
+                    `📁 File selected: ${file.name}. Click "Confirm Restore" to proceed.`
+                );
+            }
+        });
+        
+        // Restore Button
+        document.getElementById('restoreBtn').addEventListener('click', function() {
+            if (!selectedFile) {
+                showStatus('restoreStatus', 'error', '❌ No file selected!');
+                return;
+            }
+            
+            if (!confirm('⚠️ WARNING: This will REPLACE ALL current data!\n\nAre you absolutely sure you want to continue?')) {
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    // Validate backup structure
+                    if (typeof backup !== 'object' || backup === null) {
+                        throw new Error('Invalid backup file format');
+                    }
+                    
+                    // Clear existing CorpManageSys data
+                    const keysToRemove = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith('corporate-management-')) {
+                            keysToRemove.push(key);
+                        }
+                    }
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+                    
+                    // Restore data
+                    Object.keys(backup).forEach(key => {
+                        localStorage.setItem(key, backup[key]);
+                    });
+                    
+                    const stats = getDataStats(backup);
+                    showStatus('restoreStatus', 'success', 
+                        `✅ Data restored successfully! Restored ${Object.keys(stats).length} data categories. ` +
+                        `Please reload the page to see the changes.`
+                    );
+                    
+                    // Auto-reload after 2 seconds
+                    setTimeout(() => {
+                        if (confirm('Reload page now to see restored data?')) {
+                            location.reload();
+                        }
+                    }, 2000);
+                    
+                } catch (error) {
+                    showStatus('restoreStatus', 'error', 
+                        `❌ Error restoring data: ${error.message}`
+                    );
+                }
+            };
+            reader.readAsText(selectedFile);
+        });
+        
+        // View Data Button
+        document.getElementById('viewBtn').addEventListener('click', function() {
+            try {
+                const data = getCorpManageData();
+                
+                if (Object.keys(data).length === 0) {
+                    showStatus('viewStatus', 'info', '📭 No CorpManageSys data found in localStorage.');
+                    return;
+                }
+                
+                const stats = getDataStats(data);
+                let summary = '<strong>📊 Data Summary:</strong><br/><br/>';
+                
+                Object.keys(stats).sort().forEach(key => {
+                    summary += `<code>${key}</code>: ${stats[key]} item(s)<br/>`;
+                });
+                
+                showStatus('viewStatus', 'info', summary);
+            } catch (error) {
+                showStatus('viewStatus', 'error', `❌ Error viewing data: ${error.message}`);
+            }
+        });
+        
+        // Clear Data Button
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            if (!confirm('⚠️ DANGER: This will permanently delete ALL CorpManageSys data!\n\nThis includes:\n- All companies\n- All employees\n- All tasks\n- All users\n- All templates\n- All activity logs\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')) {
+                return;
+            }
+            
+            if (!confirm('⚠️ FINAL WARNING: Click OK to permanently delete all data, or Cancel to abort.')) {
+                return;
+            }
+            
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('corporate-management-')) {
+                        keysToRemove.push(key);
+                    }
+                }
+                
+                keysToRemove.forEach(key => localStorage.removeItem(key));
+                
+                showStatus('clearStatus', 'success', 
+                    `✅ All data cleared successfully! Removed ${keysToRemove.length} data items. ` +
+                    `Reload the page to start fresh.`
+                );
+                
+                // Auto-reload after 2 seconds
+                setTimeout(() => {
+                    if (confirm('Reload page now?')) {
+                        location.reload();
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                showStatus('clearStatus', 'error', `❌ Error clearing data: ${error.message}`);
+            }
+        });
+        
+        // Helper function to show status messages
+        function showStatus(elementId, type, message) {
+            const el = document.getElementById(elementId);
+            el.className = `status ${type}`;
+            el.innerHTML = message;
+            el.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

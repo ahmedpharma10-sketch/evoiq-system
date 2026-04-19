@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ['nodejs_20', 'python3', 'openssl']
+
+[phases.install]
+cmds = ['npm ci']
+
+[phases.build]
+cmds = ['npx vite build --config vite.config.railway.ts', 'npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist']
+
+[start]
+cmd = 'NODE_ENV=production node dist/index.js'
