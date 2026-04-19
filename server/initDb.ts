@@ -579,13 +579,19 @@ export async function initializeDatabase() {
 
   console.log("[initDb] All tables created successfully");
 
-  // Seed admin user if no users exist
-  const existingUsers = await db.execute(sql`SELECT COUNT(*) as count FROM users`);
-  const userCount = Number(existingUsers.rows?.[0]?.count || existingUsers[0]?.count || 0);
+  // Ensure admin user exists (create or update)
+  console.log("[initDb] Ensuring default admin user exists...");
+  const hashedPassword = await bcrypt.hash("admin123", 10);
 
-  if (userCount === 0) {
-    console.log("[initDb] Seeding default admin user...");
-    const hashedPassword = await bcrypt.hash("admin123", 10);
+  try {
+    // Try to delete existing admin user first
+    await db.execute(sql`DELETE FROM users WHERE username = 'admin'`);
+  } catch (e) {
+    // Ignore if delete fails (user might not exist)
+  }
+
+  // Create fresh admin user
+  try {
     await db.execute(sql`
       INSERT INTO users (id, user_id, username, password, password_hint, name, email, position)
       VALUES (
@@ -599,7 +605,9 @@ export async function initializeDatabase() {
         'admin'
       )
     `);
-    console.log("[initDb] Admin user created (username: admin, password: admin123)");
+    console.log("[initDb] Admin user created/updated (username: admin, password: admin123)");
+  } catch (e) {
+    console.error("[initDb] Error creating admin user:", e);
   }
 
   // Seed default HR task templates if none exist
