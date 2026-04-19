@@ -237,8 +237,8 @@ export class DatabaseStorage implements IStorage {
     }
     
     const numbers = allUsers
-      .map(u => parseInt(u.userId.replace("USR-", "")))
-      .filter(n => !isNaN(n));
+      .map((u: any) => parseInt(u.userId.replace("USR-", "")))
+      .filter((n: any) => !isNaN(n));
     
     const maxNumber = numbers.length > 0 ? Math.max(...numbers) : 0;
     const nextNumber = maxNumber + 1;
@@ -320,7 +320,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<SafeUser[]> {
     const allUsers = await db.select().from(users);
-    return allUsers.map(u => this.toSafeUser(u));
+    return allUsers.map((u: any) => this.toSafeUser(u));
   }
 
   async authenticateUser(username: string, password: string): Promise<SafeUser | null> {
@@ -413,7 +413,7 @@ export class DatabaseStorage implements IStorage {
 
   async upsertTask(task: InsertTask): Promise<{ task: Task; wasCreated: boolean }> {
     // Ensure dueAt is a proper Date object (may arrive as ISO string from task generators)
-    const dueAtDate = task.dueAt instanceof Date ? task.dueAt : new Date(task.dueAt);
+    const dueAtDate = task.dueAt instanceof Date ? task.dueAt : new Date(task.dueAt as any);
 
     // Check if task with this uniqueKey already exists
     const existing = await this.getTaskByUniqueKey(task.uniqueKey);
@@ -578,7 +578,6 @@ export class DatabaseStorage implements IStorage {
 
     // Create audit log entry
     await this.createAuditLog({
-      id: crypto.randomUUID(),
       taskId: id,
       action: "reopened",
       performedBy: reopenedByName,
@@ -595,7 +594,7 @@ export class DatabaseStorage implements IStorage {
     // Ensure timestamp is a proper Date object
     const values = {
       ...audit,
-      timestamp: audit.timestamp instanceof Date ? audit.timestamp : new Date(audit.timestamp || Date.now()),
+      timestamp: (audit.timestamp as any) instanceof Date ? audit.timestamp : new Date((audit.timestamp as any) || Date.now()),
     };
     const [newAudit] = await db
       .insert(taskAuditsTable)
@@ -608,21 +607,21 @@ export class DatabaseStorage implements IStorage {
   async getAuditLogs(): Promise<TaskAudit[]> {
     const audits = await db.select().from(taskAuditsTable);
     // Sort by timestamp descending (newest first)
-    return audits.sort((a, b) => 
+    return audits.sort((a: any, b: any) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
   async getAuditLogsByTask(taskId: string): Promise<TaskAudit[]> {
     const audits = await db.select().from(taskAuditsTable).where(eq(taskAuditsTable.taskId, taskId));
-    return audits.sort((a, b) => 
+    return audits.sort((a: any, b: any) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
   async getAuditLogsByCompany(companyId: string): Promise<TaskAudit[]> {
     const audits = await db.select().from(taskAuditsTable).where(eq(taskAuditsTable.companyId, companyId));
-    return audits.sort((a, b) => 
+    return audits.sort((a: any, b: any) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
@@ -786,22 +785,20 @@ export class DatabaseStorage implements IStorage {
 
     // Create general log entry for audit trail
     await this.createGeneralLog({
-      id: crypto.randomUUID(),
       action: "reopened",
       category: "employee_task",
       performedBy: reopenedByName,
-      performedById: reopenedById,
+      performedByName: reopenedByName,
       targetId: id,
       targetName: `${task.employeeName} - ${task.title}`,
-      oldValue: oldStatus,
-      newValue: "open",
+      details: `Task reopened by ${reopenedByName}. Reason: ${reason || 'N/A'}`,
       metadata: {
         employeeId: task.employeeId,
         employeeName: task.employeeName,
         taskTitle: task.title,
-        reason: reason || `Task reopened by ${reopenedByName}`,
+        oldValue: oldStatus,
+        newValue: "open",
       },
-      timestamp: new Date().toISOString(),
     });
 
     return updatedTask;
@@ -816,7 +813,7 @@ export class DatabaseStorage implements IStorage {
   // ==================
   async getHRTaskTemplates(): Promise<HRTaskTemplate[]> {
     const templates = await db.select().from(hrTaskTemplatesTable);
-    return templates.map(t => ({
+    return templates.map((t: any) => ({
       ...t,
       createdAt: t.createdAt.toISOString(),
     }));
@@ -1134,8 +1131,8 @@ export class DatabaseStorage implements IStorage {
       .from(generalLogTable)
       .orderBy(desc(generalLogTable.timestamp))
       .limit(limit);
-    
-    return logs.map(log => ({
+
+    return logs.map((log: any) => ({
       ...log,
       timestamp: log.timestamp.toISOString(),
     }));
@@ -1228,7 +1225,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(generalLogTable.targetId, targetId))
       .orderBy(desc(generalLogTable.timestamp))
       .limit(limit);
-    return logs.map(log => ({
+    return logs.map((log: any) => ({
       ...log,
       timestamp: log.timestamp.toISOString(),
     }));
@@ -1241,7 +1238,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(generalLogTable.category, category))
       .orderBy(desc(generalLogTable.timestamp))
       .limit(limit);
-    return logs.map(log => ({
+    return logs.map((log: any) => ({
       ...log,
       timestamp: log.timestamp.toISOString(),
     }));

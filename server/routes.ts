@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const users = await storage.getAllUsers();
       // Remove password hints from all users for security
-      const usersWithoutHints = users.map(({ passwordHint: _, ...user }) => user);
+      const usersWithoutHints = users.map(({ passwordHint, ...user }: any) => user);
       res.json(usersWithoutHints);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch users" });
@@ -238,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Remove password hint from response
-      const { passwordHint: _, ...userWithoutHint } = user;
+      const { passwordHint: _hint, ...userWithoutHint } = user as any;
       res.json(userWithoutHint);
     } catch (error) {
       res.status(500).json({ error: "Failed to update user" });
@@ -955,7 +955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[Task Generation] ========== START ==========`);
       console.log(`[Task Generation] Found ${companies.length} total companies`);
       
-      const activeCompanies = companies.filter(c => c.isActive && c.renewalDate);
+      const activeCompanies = companies.filter((c: any) => c.isActive && c.renewalDate);
       console.log(`[Task Generation] Active companies with renewal dates: ${activeCompanies.length}`);
 
       for (const company of companies) {
@@ -1241,7 +1241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/residency-tasks/generate", requireAuth, async (req, res) => {
     try {
       const employees = await storage.getEmployees();
-      const residencyEmployees = employees.filter(e => e.isResidencyService);
+      const residencyEmployees = employees.filter((e: any) => e.isResidencyService);
       const templates = await storage.getResidencyTaskTemplates();
       let tasksCreated = 0;
       let tasksSkipped = 0;
@@ -3271,7 +3271,7 @@ For database issues:
 
       // Calculate score
       let correctCount = 0;
-      const results = questions.map((q, index) => {
+      const results = questions.map((q: any, index: any) => {
         const userAnswer = answers[index];
         const isCorrect = userAnswer === q.correctAnswer;
         if (isCorrect) correctCount++;
